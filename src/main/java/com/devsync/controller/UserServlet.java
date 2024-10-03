@@ -25,37 +25,88 @@ public class UserServlet extends HttpServlet {
         userRepository = new UserRepository();
     }
 
-
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        String action = req.getParameter("action");
 
-        String username = req.getParameter("username");
-        String name = req.getParameter("name");
-        String prenom = req.getParameter("prenom");
-        String email = req.getParameter("email");
-        String password = req.getParameter("password");
-        String userType = req.getParameter("userType");
-        User user = new User(username, name, prenom, email, password, User.UserType.valueOf(userType));
-        System.out.println(user);
+        if ("add".equals(action)) {
+            String username = req.getParameter("username");
+            String name = req.getParameter("name");
+            String prenom = req.getParameter("prenom");
+            String email = req.getParameter("email");
+            String password = req.getParameter("password");
+            String userType = req.getParameter("userType");
+            User user = new User(username, name, prenom, email, password, User.UserType.valueOf(userType));
+            System.out.println(user);
 
-        userRepository.addUser(user);
+            userRepository.addUser(user);
 
-        resp.sendRedirect(req.getContextPath()+"index.jsp");
+            // Récupérer la liste mise à jour des utilisateurs
+            List<User> users = userRepository.findAll();
+            req.setAttribute("users", users);
 
-}
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<User> users = userRepository.findAll();
-        System.out.println("Users retrieved: " + users);
-        req.setAttribute("users", users);
-        req.setAttribute("anas","anas");
-        req.getRequestDispatcher("index.jsp").forward(req, resp);
+            // Rediriger vers la page d'index avec la liste mise à jour
+            req.getRequestDispatcher("index.jsp").forward(req, resp);
+
+        } else if ("update".equals(action)) {
+            Long userId = Long.valueOf(req.getParameter("id"));
+            String username = req.getParameter("username");
+            String name = req.getParameter("name");
+            String prenom = req.getParameter("prenom");
+            String email = req.getParameter("email");
+            String password = req.getParameter("password");
+            String userType = req.getParameter("userType");
+
+            User user = new User(username, name, prenom, email, password, User.UserType.valueOf(userType));
+            user.setId(userId);
+            userRepository.updateUser(user);
+
+            // Récupérer la liste mise à jour des utilisateurs
+            List<User> users = userRepository.findAll();
+            req.setAttribute("users", users);
+
+            // Rediriger vers la page d'index avec la liste mise à jour
+            req.getRequestDispatcher("index.jsp").forward(req, resp);
+
+        } else if ("delete".equals(action)) {
+            Long userId = Long.valueOf(req.getParameter("id"));
+            userRepository.deleteUser(userId);
+
+            resp.sendRedirect(req.getContextPath()+"/");
+
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action non supportée.");
+        }
     }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        String action = req.getParameter("action");
 
+        if ("edit".equals(action)) {
+            String userIdParam = req.getParameter("id");
+            if (userIdParam != null && !userIdParam.isEmpty()) {
+                Long userId = Long.valueOf(userIdParam);
+                User user = userRepository.findById(userId);
+                if (user != null) {
+                    req.setAttribute("user", user);
+                    req.getRequestDispatcher("/edit.jsp").forward(req, res);
+                } else {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND, "User not found");
+                }
+            } else {
+                res.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID is required");
+            }
+        } else {
+            List<User> users = userRepository.findAll();
+
+            req.setAttribute("users", users);
+
+            req.getRequestDispatcher("index.jsp").forward(req, res);  // Redirection vers index.jsp
+        }
+    }
 
     @Override
     public void destroy() {
         emf.close();
     }
-
 }

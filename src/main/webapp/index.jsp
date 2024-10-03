@@ -25,12 +25,7 @@
     </tr>
     </thead>
     <tbody>
-    <%
-        // Retrieve the user list from request attributes
-        String name = request.getAttribute("anas").toString();
 
-    %>
-    <p>anas nas<%=name%></p>
     <%
         // Retrieve the user list from request attributes
         List<User> users = (List<User>) request.getAttribute("users");
@@ -44,17 +39,21 @@
         <td><%= user.getName() %></td>
         <td><%= user.getPrenom() %></td>
         <td><%= user.getEmail() %></td>
+        <td><%= user.getUserType() %></td>
+
         <td>
             <form action="users" method="POST" style="display:inline;">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="id" value="<%= user.getId() %>">
                 <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this user?');">
             </form>
+
             <form action="users" method="GET" style="display:inline;">
                 <input type="hidden" name="action" value="edit">
-                <input type="hidden" name="userId" value="<%= user.getId() %>">
+                <input type="hidden" name="id" value="<%= user.getId() %>">
                 <input type="submit" value="Edit">
             </form>
+
         </td>
     </tr>
     <%

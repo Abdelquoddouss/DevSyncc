@@ -33,4 +33,31 @@ public class UserRepository {
     }
 
 
+    public void updateUser(User user) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        em.merge(user);  // Use merge for updating
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    public void deleteUser(Long id) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        User user = em.find(User.class, id);
+        if (user != null) {
+            em.remove(user);
+        }
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    public User findById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        User user = em.find(User.class, id);
+        em.close();
+        return user;
+    }
+
+
 }

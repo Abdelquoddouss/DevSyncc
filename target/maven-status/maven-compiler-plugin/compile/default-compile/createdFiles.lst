@@ -1,0 +1,5 @@
+com\devsync\repository\UserRepository.class
+com\devsync\model\User$UserType.class
+com\devsync\controller\UserServlet.class
+com\devsync\enums\UserType.class
+com\devsync\model\User.class
