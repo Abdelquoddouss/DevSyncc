@@ -41,11 +41,9 @@ public class UserServlet extends HttpServlet {
 
             userRepository.addUser(user);
 
-            // Récupérer la liste mise à jour des utilisateurs
             List<User> users = userRepository.findAll();
             req.setAttribute("users", users);
 
-            // Rediriger vers la page d'index avec la liste mise à jour
             req.getRequestDispatcher("index.jsp").forward(req, resp);
 
         } else if ("update".equals(action)) {
@@ -61,11 +59,9 @@ public class UserServlet extends HttpServlet {
             user.setId(userId);
             userRepository.updateUser(user);
 
-            // Récupérer la liste mise à jour des utilisateurs
             List<User> users = userRepository.findAll();
             req.setAttribute("users", users);
 
-            // Rediriger vers la page d'index avec la liste mise à jour
             req.getRequestDispatcher("index.jsp").forward(req, resp);
 
         } else if ("delete".equals(action)) {
@@ -78,6 +74,8 @@ public class UserServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action non supportée.");
         }
     }
+
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String action = req.getParameter("action");
@@ -101,7 +99,7 @@ public class UserServlet extends HttpServlet {
 
             req.setAttribute("users", users);
 
-            req.getRequestDispatcher("index.jsp").forward(req, res);  // Redirection vers index.jsp
+            req.getRequestDispatcher("index.jsp").forward(req, res);
         }
     }
 
