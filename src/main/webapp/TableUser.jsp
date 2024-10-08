@@ -106,6 +106,7 @@
                 <td class="px-6 py-4"><%= user.getPrenom() %></td>
                 <td class="px-6 py-4"><%= user.getEmail() %></td>
                 <td class="px-6 py-4"><%= user.getUserType() %></td>
+
                 <td class="px-6 py-4">
                     <!-- Boutons d'action -->
                     <a href="UserServlet?action=edit&id=<%= user.getId() %>" class="text-blue-600 hover:underline">Edit</a>
