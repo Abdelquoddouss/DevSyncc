@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/")
+@WebServlet("/users")
 public class UserServlet extends HttpServlet {
 
     private EntityManagerFactory emf;
@@ -30,23 +30,20 @@ public class UserServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("add".equals(action)) {
-            String username = req.getParameter("username");
             String name = req.getParameter("name");
             String prenom = req.getParameter("prenom");
             String email = req.getParameter("email");
             String password = req.getParameter("password");
             String userType = req.getParameter("userType");
-            User user = new User(username, name, prenom, email, password, User.UserType.valueOf(userType));
-            System.out.println(user);
 
+            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType));
             userRepository.addUser(user);
 
             List<User> users = userRepository.findAll();
             req.setAttribute("users", users);
-
-            req.getRequestDispatcher("index.jsp").forward(req, resp);
-
-        } else if ("update".equals(action)) {
+            req.getRequestDispatcher("TableUser.jsp").forward(req, resp);
+        }
+        else if ("update".equals(action)) {
             Long userId = Long.valueOf(req.getParameter("id"));
             String username = req.getParameter("username");
             String name = req.getParameter("name");
@@ -55,14 +52,14 @@ public class UserServlet extends HttpServlet {
             String password = req.getParameter("password");
             String userType = req.getParameter("userType");
 
-            User user = new User(username, name, prenom, email, password, User.UserType.valueOf(userType));
+            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType));
             user.setId(userId);
             userRepository.updateUser(user);
 
             List<User> users = userRepository.findAll();
             req.setAttribute("users", users);
 
-            req.getRequestDispatcher("index.jsp").forward(req, resp);
+            req.getRequestDispatcher("TableUser.jsp").forward(req, resp);
 
         } else if ("delete".equals(action)) {
             Long userId = Long.valueOf(req.getParameter("id"));
@@ -99,7 +96,7 @@ public class UserServlet extends HttpServlet {
 
             req.setAttribute("users", users);
 
-            req.getRequestDispatcher("index.jsp").forward(req, res);
+            req.getRequestDispatcher("TableUser.jsp").forward(req, res);
         }
     }
 

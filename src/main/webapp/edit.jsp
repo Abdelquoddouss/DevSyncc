@@ -5,132 +5,39 @@
 <head>
     <title>Edit User</title>
     <style>
-        /* Style général pour le corps de la page */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
-        }
-
-        /* Style pour le conteneur du formulaire */
-        form {
-            background-color: #ffffff;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            max-width: 400px;
-            margin: 0 auto;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Style pour les étiquettes et les champs de formulaire */
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        /* Style pour les liens */
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            text-decoration: none;
-            color: white;
-            background-color: #008CBA;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-            text-align: center;
-        }
-
-        a:hover {
-            background-color: #007BB5;
-        }
-
-        /* Centrer le texte d'en-tête */
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        form { background-color: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        label { display: block; margin-bottom: 10px; font-weight: bold; color: #333; }
+        input[type="text"], input[type="email"], input[type="password"], select { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
-<h2>Edit User</h2>
-
-<%
-    User user = (User) request.getAttribute("user");
-    if (user == null) {
-%>
-<p>Error: User not found.</p>
-<a href="${pageContext.request.contextPath}/">Back to User List</a>
-<%
-} else {
-%>
-
-<form action="${pageContext.request.contextPath}/" method="POST">
+<form action="users" method="POST">
+    <!-- Hidden action field for updating -->
     <input type="hidden" name="action" value="update">
-    <input type="hidden" name="id" value="<%= user.getId() %>">
+    <input type="hidden" name="id" value="${user.id}">
 
-    <label>Username:</label>
-    <input type="text" name="username" value="<%= user.getUsername() %>" required><br>
+    <label >Nom</label>
+    <input type="text" name="name" value="${user.name}" required>
 
-    <label>First Name:</label>
-    <input type="text" name="name" value="<%= user.getName() %>" required><br>
+    <label >Prénom</label>
+    <input type="text" name="prenom" value="${user.prenom}" required>
 
-    <label>Last Name:</label>
-    <input type="text" name="prenom" value="<%= user.getPrenom() %>" required><br>
+    <label >Email</label>
+    <input type="email" name="email" value="${user.email}" required>
 
-    <label>Email:</label>
-    <input type="email" name="email" value="<%= user.getEmail() %>" required><br>
+    <label >Mot de passe</label>
+    <input type="password" name="password" value="${user.password}" required>
 
-    <label>Password:</label>
-    <input type="password" name="password" value="<%= user.getPassword() %>" required><br>
-
-    <label>Role:</label>
+    <label >Type d'utilisateur</label>
     <select name="userType">
-        <option value="MANAGER" <%= user.getUserType() == User.UserType.MANAGER ? "selected" : "" %>>Manager</option>
-        <option value="USER" <%= user.getUserType() == User.UserType.USER ? "selected" : "" %>>User</option>
-    </select><br>
+        <option value="USER" ${user.userType == 'USER' ? 'selected' : ''}>User</option>
+        <option value="MANAGER" ${user.userType == 'MANAGER' ? 'selected' : ''}>Manager</option>
+    </select>
 
-    <input type="submit" value="Update">
+    <button type="submit">Mettre à jour</button>
 </form>
-
-<a href="${pageContext.request.contextPath}/">Back to User List</a>
-
-<%
-    }
-%>
-
 </body>
 </html>
