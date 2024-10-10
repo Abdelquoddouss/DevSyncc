@@ -12,7 +12,7 @@ import java.io.IOException;
 @WebServlet("/Dashborde")
 public class Dashbord extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/test.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/ViewUser.jsp");
         dispatcher.forward(request, response);
     }
 }
