@@ -5,6 +5,8 @@
     import lombok.Getter;
     import lombok.Setter;
 
+    import java.util.List;
+
     @Data
     @Entity
     @Table(name = "users")
@@ -31,6 +33,9 @@
         @Enumerated(EnumType.STRING)
         @Column(name = "usertype" , nullable = false)
         private UserType userType;
+
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+        private List<Task> tasks;
 
         public enum UserType {
             USER, MANAGER
