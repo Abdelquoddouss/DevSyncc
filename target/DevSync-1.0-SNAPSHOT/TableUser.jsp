@@ -106,11 +106,16 @@
                 <td class="px-6 py-4"><%= user.getPrenom() %></td>
                 <td class="px-6 py-4"><%= user.getEmail() %></td>
                 <td class="px-6 py-4"><%= user.getUserType() %></td>
+
                 <td class="px-6 py-4">
-                    <!-- Boutons d'action -->
-                    <a href="UserServlet?action=edit&id=<%= user.getId() %>" class="text-blue-600 hover:underline">Edit</a>
-                    <a href="UserServlet?action=delete&id=<%= user.getId() %>" class="text-red-600 hover:underline ml-4">Delete</a>
+                    <!-- Boutons d'action pour Edit et Delete -->
+                    <a href="users?action=edit&id=<%= user.getId() %>" class="text-blue-600 hover:underline">Edit</a>
+                    <a href="users?action=delete&id=<%= user.getId() %>"
+                       class="text-red-600 hover:underline ml-4" >
+                        Delete
+                    </a>
                 </td>
+
             </tr>
             <%
                     }

@@ -6,140 +6,76 @@
 <head>
     <title>User List</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <style>
-        /* Style pour le tableau */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-        }
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
-        table thead {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 12px 15px;
-            text-align: center;
-        }
-
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        table th {
-            font-size: 16px;
-            text-transform: uppercase;
-        }
-
-        table td {
-            font-size: 14px;
-        }
-
-        /* Style pour les boutons */
-        input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        a {
-            display: inline-block;
-            background-color: #008CBA;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        a:hover {
-            background-color: #007BB5;
-        }
-
-    </style>
 </head>
 <body>
-<h2>User List</h2>
+<div class="bg-white dark:bg-gray-900">
+    <div class="flex justify-center h-screen">
+        <div class="hidden bg-cover lg:block lg:w-2/3" style="background-image: url(https://images.unsplash.com/photo-1616763355603-9755a640a287?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80)">
+            <div class="flex items-center h-full px-20 bg-gray-900 bg-opacity-40">
+                <div>
+                    <h2 class="text-2xl font-bold text-white sm:text-3xl">Meraki UI</h2>
 
-<hr>
+                    <p class="max-w-xl mt-3 text-gray-300">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. In
+                        autem ipsa, nulla laboriosam dolores, repellendus perferendis libero suscipit nam temporibus
+                        molestiae
+                    </p>
+                </div>
+            </div>
+        </div>
 
-<h3>Existing Users</h3>
-<table border="1">
-    <thead>
-    <tr>
-        <th>Id</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
+        <div class="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6">
+            <div class="flex-1">
+                <div class="text-center">
+                    <div class="flex justify-center mx-auto">
+                        <img class="w-auto h-7 sm:h-8" src="https://merakiui.com/images/logo.svg" alt="">
+                    </div>
 
-    <%
-        // Retrieve the user list from request attributes
-        List<User> users = (List<User>) request.getAttribute("users");
+                    <p class="mt-3 text-gray-500 dark:text-gray-300">Sign in to access your account</p>
+                </div>
 
-        if (users != null && !users.isEmpty()) {
-            // Iterate over the users list
-            for (User user : users) {
-    %>
-    <tr>
-        <td> hhh<%= user.getId() %></td>
-        <td><%= user.getName() %></td>
-        <td><%= user.getPrenom() %></td>
-        <td><%= user.getEmail() %></td>
-        <td><%= user.getUserType() %></td>
+                <div class="mt-8">
+                    <!-- Display error message if it exists -->
+                    <%
+                        String errorMessage = (String) request.getAttribute("errorMessage");
+                        if (errorMessage != null) {
+                    %>
+                    <div class="text-red-600 text-center font-bold mb-4">
+                        <%= errorMessage %>
+                    </div>
+                    <%
+                        }
+                    %>
+                    <form method="POST" action="login">
+                        <div>
+                            <label for="email" class="block mb-2 text-sm text-gray-600 dark:text-gray-200">Email Address</label>
+                            <input type="email" name="email" id="email" placeholder="example@example.com" class="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40" />
+                        </div>
 
-        <td>
-            <form action="users" method="POST" style="display:inline;">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="<%= user.getId() %>">
-                <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this user?');">
-            </form>
+                        <div class="mt-6">
+                            <div class="flex justify-between mb-2">
+                                <label for="password" class="text-sm text-gray-600 dark:text-gray-200">Password</label>
+                                <a href="#" class="text-sm text-gray-400 focus:text-blue-500 hover:text-blue-500 hover:underline">Forgot password?</a>
+                            </div>
 
-            <form action="users" method="GET" style="display:inline;">
-                <input type="hidden" name="action" value="edit">
-                <input type="hidden" name="id" value="<%= user.getId() %>">
-                <input type="submit" value="Edit">
-            </form>
+                            <input type="password" name="password" id="password" placeholder="Your Password" class="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg dark:placeholder-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 focus:border-blue-400 dark:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40" />
+                        </div>
 
-        </td>
-    </tr>
-    <%
-        }
-    } else {
-    %>
-    <tr>
-        <td colspan="6">No users found.</td>
-    </tr>
-    <%
-        }
-    %>
+                        <div class="mt-6">
+                            <button type="submit" class="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
 
-    </tbody>
-</table>
-<hr>
 
-<a href="./create.jsp">Add New User</a>
+                    <p class="mt-6 text-sm text-center text-gray-400">Don&#x27;t have an account yet? <a href="#" class="text-blue-500 focus:outline-none focus:underline hover:underline">Sign up</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
