@@ -10,10 +10,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @WebServlet("/tasks")
 public class TaskServlet extends HttpServlet {
@@ -26,7 +28,6 @@ public class TaskServlet extends HttpServlet {
         taskRepository = new TaskRepository();
         userRepository = new UserRepository(); // Initialiser le repository des utilisateurs
     }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
@@ -37,9 +38,8 @@ public class TaskServlet extends HttpServlet {
             LocalDate creationDate = LocalDate.now();
             LocalDate dueDate = LocalDate.parse(req.getParameter("dueDate"));
             Long userId = Long.valueOf(req.getParameter("userId"));
-            TaskStatus status = TaskStatus.NOT_STARTED; // Statut par défaut
+            TaskStatus status = TaskStatus.NOT_STARTED;
 
-            // Créer une nouvelle tâche
             Task task = new Task();
             task.setTitle(title);
             task.setDesctiption(description);
@@ -47,13 +47,11 @@ public class TaskServlet extends HttpServlet {
             task.setDueDate(dueDate);
             task.setStatus(status);
 
-            // Assigner l'utilisateur à la tâche
             User assignedUser = userRepository.findById(userId);
             task.setUser(assignedUser);
 
             taskRepository.addTask(task);
 
-            // Récupérer toutes les tâches et les renvoyer à la vue
             List<Task> tasks = taskRepository.findAll();
             req.setAttribute("tasks", tasks);
             req.getRequestDispatcher("Task.jsp").forward(req, resp);
@@ -69,13 +67,32 @@ public class TaskServlet extends HttpServlet {
             taskRepository.deleteTask(taskId);
             resp.sendRedirect(req.getContextPath() + "/tasks");
         } else {
-            // Récupérer toutes les tâches et les utilisateurs pour les afficher
-            List<Task> tasks = taskRepository.findAll();
-            List<User> users = userRepository.findAll(); // Récupérer les utilisateurs pour les assigner
 
-            req.setAttribute("tasks", tasks);
-            req.setAttribute("users", users); // Passer les utilisateurs à la vue
-            req.getRequestDispatcher("Task.jsp").forward(req, resp);
+            HttpSession session = req.getSession();
+            User user= (User) session.getAttribute("user");
+
+
+            List<Task> tasks = taskRepository.findAll();
+            List<Task> userTasks = taskRepository.findTasksByUser(user.getId());
+            List<User> users = userRepository.findAll();
+
+
+
+
+
+
+
+
+            if (user.getUserType() == User.UserType.USER) {
+                req.setAttribute("tasks", userTasks);
+                req.getRequestDispatcher("ViewUser.jsp").forward(req, resp);
+            } else {
+                req.setAttribute("tasks", tasks);
+                req.setAttribute("users", users);
+                req.getRequestDispatcher("Task.jsp").forward(req, resp);
+
+            }
+
         }
     }
 }

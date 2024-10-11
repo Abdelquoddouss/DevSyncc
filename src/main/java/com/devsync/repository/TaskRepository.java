@@ -54,4 +54,13 @@ public class TaskRepository {
         em.getTransaction().commit();
         em.close();
     }
+
+    public List<Task> findTasksByUser(Long userId) {
+        EntityManager em = emf.createEntityManager();
+        List<Task> tasks = em.createQuery("SELECT t FROM Task t WHERE t.user.id = :userId", Task.class)
+                .setParameter("userId", userId)
+                .getResultList();
+        em.close();
+        return tasks;
+    }
 }
