@@ -40,6 +40,13 @@ public class TaskServlet extends HttpServlet {
             Long userId = Long.valueOf(req.getParameter("userId"));
             TaskStatus status = TaskStatus.NOT_STARTED;
 
+            if (dueDate.isAfter(creationDate.plusDays(3))) {
+                // Si la dueDate est plus de 3 jours après la date actuelle, renvoyer un message d'erreur
+                req.setAttribute("error", "La date d'échéance ne peut pas être supérieure à 3 jours à partir de la date de création.");
+                req.getRequestDispatcher("Task.jsp").forward(req, resp);
+                return;
+            }
+
             Task task = new Task();
             task.setTitle(title);
             task.setDesctiption(description);
@@ -53,7 +60,11 @@ public class TaskServlet extends HttpServlet {
             taskRepository.addTask(task);
 
             List<Task> tasks = taskRepository.findAll();
+            List<User> users = userRepository.findAll();
+
             req.setAttribute("tasks", tasks);
+            req.setAttribute("users", users); // Ajoutez la liste des utilisateurs
+
             req.getRequestDispatcher("Task.jsp").forward(req, resp);
         }
     }
@@ -71,16 +82,10 @@ public class TaskServlet extends HttpServlet {
             HttpSession session = req.getSession();
             User user= (User) session.getAttribute("user");
 
-
             List<Task> tasks = taskRepository.findAll();
             List<Task> userTasks = taskRepository.findTasksByUser(user.getId());
             List<User> users = userRepository.findAll();
-
-
-
-
-
-
+            req.setAttribute("users", users);
 
 
             if (user.getUserType() == User.UserType.USER) {
