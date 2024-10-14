@@ -2,22 +2,40 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.devsync.model.Task" %>
 <%@ include file="./Dashboard.jsp"%>
+<%
+    HttpSession sessionn = request.getSession();
+    User currentUser = (User) sessionn.getAttribute("user");
+    if (currentUser == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
+
+<% if (session.getAttribute("error") != null) { %>
+<div class="alert alert-danger">
+    <%= session.getAttribute("error") %>
+</div>
+<%
+    // Supprimer l'erreur après affichage
+    session.removeAttribute("error");
+%>
+<% } %>
+
+
+
+
+
 <div class="p-4 sm:ml-64">
 
-    <% if (request.getAttribute("error") != null) { %>
-    <div class="alert alert-danger">
-        <%= request.getAttribute("error") %>
+    <div>
+        <a href="#authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            Ajoute un Task
+        </a>
     </div>
-    <% } %>
 
-    <!-- Lien pour ouvrir le modal -->
-    <a href="#authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-        Ajoute un Task
-    </a>
-
-    <!-- Main modal -->
     <!-- Main modal -->
     <div id="authentication-modal" class="modal hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+
         <div class="relative p-4 w-full max-w-md max-h-full">
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <!-- Modal Header -->
@@ -59,22 +77,32 @@
                             <input type="date" name="dueDate" id="dueDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
                         </div>
 
+
                         <!-- Assign User input -->
                         <div>
                             <label for="userId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assigner un utilisateur</label>
-                            <select name="userId" id="userId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                            <select name="userId" id="userId" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" <%= (currentUser.getUserType() == User.UserType.USER) ? "disabled" : "" %>>
                                 <%
-                                    List<User> users = (List<User>) request.getAttribute("users");
-                                    if (users != null) {
-                                        for (User user : users) {
+                                    if (currentUser.getUserType() == User.UserType.MANAGER) {
+                                        // Si c'est un manager, afficher tous les utilisateurs
+                                        List<User> users = (List<User>) request.getAttribute("users");
+                                        if (users != null) {
+                                            for (User user : users) {
                                 %>
                                 <option value="<%= user.getId() %>"><%= user.getName() %></option>
                                 <%
                                         }
                                     }
+                                } else {
+                                    // Si c'est un user, pré-remplir avec son propre nom
+                                %>
+                                <option value="<%= currentUser.getId() %>" selected><%= currentUser.getName() %></option>
+                                <%
+                                    }
                                 %>
                             </select>
                         </div>
+
 
                         <!-- Status input (hidden) -->
                         <input type="hidden" name="status" value="NOT_STARTED" />

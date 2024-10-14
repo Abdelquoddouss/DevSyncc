@@ -28,8 +28,20 @@ public class TaskServlet extends HttpServlet {
         taskRepository = new TaskRepository();
         userRepository = new UserRepository(); // Initialiser le repository des utilisateurs
     }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        User currentUser = (User) session.getAttribute("user");
+
+        if (currentUser == null) {
+            // Redirection vers la page de connexion si l'utilisateur n'est pas authentifié
+            resp.sendRedirect("/login");
+            return;
+        }
+
+        req.setAttribute("currentUser", currentUser);
+
         String action = req.getParameter("action");
 
         if ("add".equals(action)) {
@@ -37,13 +49,12 @@ public class TaskServlet extends HttpServlet {
             String description = req.getParameter("description");
             LocalDate creationDate = LocalDate.now();
             LocalDate dueDate = LocalDate.parse(req.getParameter("dueDate"));
-            Long userId = Long.valueOf(req.getParameter("userId"));
             TaskStatus status = TaskStatus.NOT_STARTED;
 
-            if (dueDate.isAfter(creationDate.plusDays(3))) {
-                // Si la dueDate est plus de 3 jours après la date actuelle, renvoyer un message d'erreur
+            if (!dueDate.isAfter(creationDate.plusDays(3))) {
+                HttpSession session1 = req.getSession();
                 req.setAttribute("error", "La date d'échéance ne peut pas être supérieure à 3 jours à partir de la date de création.");
-                req.getRequestDispatcher("Task.jsp").forward(req, resp);
+                resp.sendRedirect("/tasks");
                 return;
             }
 
@@ -54,18 +65,30 @@ public class TaskServlet extends HttpServlet {
             task.setDueDate(dueDate);
             task.setStatus(status);
 
-            User assignedUser = userRepository.findById(userId);
-            task.setUser(assignedUser);
+            if (currentUser.getUserType() == User.UserType.MANAGER) {
+                Long userId = Long.valueOf(req.getParameter("userId"));
+                User assignedUser = userRepository.findById(userId);
+                task.setUser(assignedUser);
+            } else {
+
+                task.setUser(currentUser);
+
+            }
 
             taskRepository.addTask(task);
 
             List<Task> tasks = taskRepository.findAll();
-            List<User> users = userRepository.findAll();
-
             req.setAttribute("tasks", tasks);
-            req.setAttribute("users", users); // Ajoutez la liste des utilisateurs
 
-            req.getRequestDispatcher("Task.jsp").forward(req, resp);
+            if (currentUser.getUserType() == User.UserType.MANAGER) {
+                List<User> users = userRepository.findAll();
+                req.setAttribute("users", users);
+                req.getRequestDispatcher("Task.jsp").forward(req, resp);
+            }else {
+                req.getRequestDispatcher("ViewUser.jsp").forward(req, resp);
+
+            }
+
         }
     }
 
@@ -78,15 +101,22 @@ public class TaskServlet extends HttpServlet {
             taskRepository.deleteTask(taskId);
             resp.sendRedirect(req.getContextPath() + "/tasks");
         } else {
-
             HttpSession session = req.getSession();
-            User user= (User) session.getAttribute("user");
+            User user = (User) session.getAttribute("user");
+
+            if (user == null) {
+                // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
+                resp.sendRedirect("login.jsp");
+                return;
+            }
+
+            // Définir currentUser comme attribut de requête
+            req.setAttribute("currentUser", user);
 
             List<Task> tasks = taskRepository.findAll();
             List<Task> userTasks = taskRepository.findTasksByUser(user.getId());
             List<User> users = userRepository.findAll();
             req.setAttribute("users", users);
-
 
             if (user.getUserType() == User.UserType.USER) {
                 req.setAttribute("tasks", userTasks);
@@ -95,9 +125,7 @@ public class TaskServlet extends HttpServlet {
                 req.setAttribute("tasks", tasks);
                 req.setAttribute("users", users);
                 req.getRequestDispatcher("Task.jsp").forward(req, resp);
-
             }
-
         }
     }
 }
