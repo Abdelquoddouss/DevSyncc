@@ -1,6 +1,7 @@
 <%@ page import="com.devsync.model.Task" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.devsync.model.User" %>
+<%@ page import="com.devsync.model.Tag" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -18,6 +19,17 @@
             return;
         }
     %>
+
+    <% if (session.getAttribute("error") != null) { %>
+    <div class="alert alert-danger">
+        <%= session.getAttribute("error") %>
+    </div>
+    <%
+        // Supprimer l'erreur après affichage
+        session.removeAttribute("error");
+    %>
+    <% } %>
+
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <div class="flex items-center gap-x-3">
@@ -36,6 +48,10 @@
         </div>
 
     </div>
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">${error}</div>
+    </c:if>
+
     <a href="javascript:void(0);" onclick="openModal()" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
         Ajoute un Task
     </a>
@@ -82,6 +98,24 @@
                             <input type="date" name="dueDate" id="dueDate" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
                         </div>
 
+                        <!-- Multi-select for Tags -->
+                        <div>
+                            <label for="tags" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Ajouter des tags</label>
+                            <select name="tags[]" id="tags" multiple class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 h-32 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                                <%
+                                    List<Tag> tags = (List<Tag>) request.getAttribute("tags");
+                                    if (tags != null) {
+                                        for (Tag tag : tags) {
+                                %>
+                                <option value="<%= tag.getId() %>"><%= tag.getName() %></option>
+                                <%
+                                        }
+                                    }
+                                %>
+                            </select>
+                        </div>
+
+
                         <!-- Assign User input -->
                         <div>
                             <label for="userId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Assigner un utilisateur</label>
@@ -106,6 +140,7 @@
                                 %>
                             </select>
                         </div>
+
 
                         <!-- Status input (hidden) -->
                         <input type="hidden" name="status" value="NOT_STARTED" />
@@ -135,6 +170,9 @@
                                 Date de début
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                Tags
+                            </th>
+                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 Date de fin
                             </th>
                             <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -161,17 +199,39 @@
                             <td class="px-4 py-4 text-sm whitespace-nowrap">
                                 <%= task.getCreationDate() %>
                             </td>
+                            <td class="px-6 py-4 text-sm whitespace-nowrap"><%= java.util.Arrays.stream(task.getTags().stream().toArray()).map(
+                                    tag -> ((Tag) tag).getName()).collect(java.util.stream.Collectors.joining(", ")
+                            ) %></td>
                             <td class="px-4 py-4 text-sm whitespace-nowrap">
                                 <%= task.getDueDate() %>
                             </td>
-                            <td class="px-4 py-4 text-sm whitespace-nowrap">
-                                <%= task.getStatus() %>
+                            <td class="px-6 py-4">
+                                <form action="tasks" method="POST" class="inline">
+                                    <input type="hidden" name="action" value="updateStatus">
+                                    <input type="hidden" name="taskId" value="<%= task.getId() %>">
+                                    <select name="status" onchange="this.form.submit()" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                                        <option value="NOT_STARTED" <%= task.getStatus().equals("NOT_STARTED") ? "selected" : "" %>>Not Started</option>
+                                        <option value="IN_PROGRESS" <%= task.getStatus().equals("IN_PROGRESS") ? "selected" : "" %>>In Progress</option>
+                                        <option value="COMPLETED" <%= task.getStatus().equals("COMPLETED") ? "selected" : "" %>>Completed</option>
+                                    </select>
+
+                                </form>
                             </td>
+                            <td class="px-6 py-4">
+                                <a href="tasks?action=delete&taskId=<%= task.getId() %>" class="text-red-600 hover:text-red-900">Supprimer</a>
+                            </td>
+
                         </tr>
                         <%
                             }
-                            }
+                        } else {
                         %>
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center">Aucune tâche trouvée.</td>
+                        </tr>
+                        <% } %>
+                        </tr>
+
 
                         </tbody>
                     </table>

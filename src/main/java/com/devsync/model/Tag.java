@@ -1,10 +1,12 @@
 package com.devsync.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,6 +19,9 @@ public class Tag {
     private long id;
 
     private String name;
+
+    @ManyToMany
+    private List<Task> tasks = new ArrayList<>();
 
     public Tag(String name) {
         this.name = name;

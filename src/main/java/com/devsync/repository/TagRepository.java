@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TagRepository {
 
-    private EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
     public TagRepository(){
         this.emf = Persistence.createEntityManagerFactory("DevSyncPU");
@@ -25,14 +25,15 @@ public class TagRepository {
 
     public List<Tag> findAll(){
         EntityManager em = emf.createEntityManager();
-        List<Tag> tags = em.createQuery("SELECT t FROM Tag t",Tag.class).getResultList();
+        List<Tag> tags = em.createQuery("SELECT t FROM Tag t", Tag.class).getResultList();
         em.close();
         return tags;
     }
 
+    // Méthode rendue non statique
     public Tag findById(Long id){
         EntityManager em = emf.createEntityManager();
-        Tag tag = em.find(Tag.class,id);
+        Tag tag = em.find(Tag.class, id);
         em.close();
         return tag;
     }

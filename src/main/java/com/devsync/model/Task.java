@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -30,6 +32,8 @@ public class Task {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Tag> tags;
 
 
 
