@@ -184,9 +184,8 @@
             ) %></td>
             <td class="px-6 py-4"><%= task.getStatus() %></td>
             <td class="px-6 py-4">
-                <a href="tasks?action=delete&taskId=<%= task.getId() %>" class="text-red-600 hover:text-red-900">Supprimer</a>
+                <a href="tasks?action=delete&id=<%= task.getId() %>" class="text-red-600 hover:underline">Supprimer</a>
             </td>
-
         </tr>
         <%
                 }

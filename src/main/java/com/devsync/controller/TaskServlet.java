@@ -7,6 +7,9 @@ import com.devsync.model.User;
 import com.devsync.repository.TagRepository;
 import com.devsync.repository.TaskRepository;
 import com.devsync.repository.UserRepository;
+import com.devsync.services.TagService;
+import com.devsync.services.TaskService;
+import com.devsync.services.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,16 +24,15 @@ import java.util.stream.Collectors;
 
 @WebServlet("/tasks")
 public class TaskServlet extends HttpServlet {
-
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
-    private TagRepository tagRepository;
+    private TaskService taskService;
+    private UserService userService;
+    private TagService tagService; // Declare TagService
 
     @Override
     public void init() {
-        taskRepository = new TaskRepository();
-        userRepository = new UserRepository();
-        tagRepository = new TagRepository();
+        taskService = new TaskService();
+        userService = new UserService(); // Initialize UserService if needed
+        tagService = new TagService(); // Initialize TagService
     }
 
     @Override
@@ -68,39 +70,16 @@ public class TaskServlet extends HttpServlet {
             task.setDueDate(dueDate);
             task.setStatus(status);
 
-            // Assign the task to the user
-            if (currentUser.getUserType() == User.UserType.MANAGER) {
-                Long userId = Long.valueOf(req.getParameter("userId"));
-                User assignedUser = userRepository.findById(userId);
-                task.setUser(assignedUser);
-            } else {
-                task.setUser(currentUser);
-            }
-
-
             String[] selectedTagIds = req.getParameterValues("tags[]");
-            if (selectedTagIds != null) {
-                List<Tag> selectedTags = new ArrayList<>();
-                for (String tagIdStr : selectedTagIds) {
-                    Long tagId = Long.valueOf(tagIdStr);
-                    Tag tag = tagRepository.findById(tagId);
-                    if (tag != null) {
-                        selectedTags.add(tag);
-                    }
-                }
-                task.setTags( selectedTags);
-            }
-
-            // Add the task to the repository
-            taskRepository.addTask(task);
+            taskService.addTask(task, currentUser, selectedTagIds);
 
             // Fetch and display all tasks
-            List<Task> tasks = taskRepository.findAll();
+            List<Task> tasks = taskService.findAllTasks();
             req.setAttribute("tasks", tasks);
 
             if (currentUser.getUserType() == User.UserType.MANAGER) {
                 // Show the task list for managers
-                List<User> users = userRepository.findAll();
+                List<User> users = userService.findAllUsers(); // Changed to userService
                 req.setAttribute("users", users);
                 req.getRequestDispatcher("Task.jsp").forward(req, resp);
             } else {
@@ -109,21 +88,19 @@ public class TaskServlet extends HttpServlet {
             }
         }
 
-
         if ("updateStatus".equals(action)) {
             Long taskId = Long.valueOf(req.getParameter("taskId"));
             String newStatusStr = req.getParameter("status");
 
             try {
                 TaskStatus newStatus = TaskStatus.valueOf(newStatusStr);
+                taskService.updateTaskStatus(taskId, newStatus);
 
-                taskRepository.updateTaskStatus(taskId, newStatus);
-
-                List<Task> tasks = taskRepository.findAll();
+                List<Task> tasks = taskService.findAllTasks();
                 req.setAttribute("tasks", tasks);
 
                 if (currentUser.getUserType() == User.UserType.MANAGER) {
-                    List<User> users = userRepository.findAll();
+                    List<User> users = userService.findAllUsers(); // Changed to userService
                     req.setAttribute("users", users);
                     req.getRequestDispatcher("Task.jsp").forward(req, resp);
                 } else {
@@ -141,46 +118,26 @@ public class TaskServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("delete".equals(action)) {
-            Long taskId = Long.valueOf(req.getParameter("taskId"));
-            Task task = taskRepository.findById(taskId); // Fetch the task to check ownership
-
-            HttpSession session = req.getSession();
-            User currentUser = (User) session.getAttribute("user");
-
-            if (currentUser == null) {
-                resp.sendRedirect("login.jsp");
-                return;
-            }
-
-            if (currentUser.getUserType() == User.UserType.MANAGER) {
-                taskRepository.deleteTask(taskId);
-            } else if (task.getUser().getId().equals(currentUser.getId())) {
-                taskRepository.deleteTask(taskId);
-            } else {
-                // Set an error message if the user is not authorized to delete
-                req.setAttribute("error", "Vous n'êtes pas autorisé à supprimer cette tâche.");
-            }
-
-            // Redirect to the task list
+            Long taskId = Long.valueOf(req.getParameter("id"));
+            taskService.deleteTask(taskId);
             resp.sendRedirect(req.getContextPath() + "/tasks");
         } else {
-            // Existing code for other actions
             HttpSession session = req.getSession();
             User user = (User) session.getAttribute("user");
 
             if (user == null) {
-                // Redirect to login page if the user is not authenticated
+                // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
                 resp.sendRedirect("login.jsp");
                 return;
             }
 
-            // Set currentUser as a request attribute
+            // Définir currentUser comme attribut de requête
             req.setAttribute("currentUser", user);
 
-            List<Task> tasks = taskRepository.findAll();
-            List<Task> userTasks = taskRepository.findTasksByUser(user.getId());
-            List<User> users = userRepository.findAll();
-            List<Tag> tags = tagRepository.findAll();
+            List<Task> tasks = taskService.findAllTasks();
+            List<Task> userTasks = taskService.findTasksByUser(user.getId());
+            List<User> users = userService.findAllUsers(); // Changed to userService
+            List<Tag> tags = tagService.findAllTags(); // Use TagService to get tags
 
             req.setAttribute("users", users);
             req.setAttribute("tags", tags);
@@ -190,7 +147,6 @@ public class TaskServlet extends HttpServlet {
                 req.getRequestDispatcher("ViewUser.jsp").forward(req, resp);
             } else {
                 req.setAttribute("tasks", tasks);
-                req.setAttribute("users", users);
                 req.getRequestDispatcher("Task.jsp").forward(req, resp);
             }
         }

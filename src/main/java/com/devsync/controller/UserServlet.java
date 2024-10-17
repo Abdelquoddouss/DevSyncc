@@ -2,6 +2,7 @@ package com.devsync.controller;
 
 import com.devsync.model.User;
 import com.devsync.repository.UserRepository;
+import com.devsync.services.UserService;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.servlet.ServletException;
@@ -9,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,12 +19,12 @@ import java.util.List;
 public class UserServlet extends HttpServlet {
 
     private EntityManagerFactory emf;
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public void init() {
         emf = Persistence.createEntityManagerFactory("DevSyncPU");
-        userRepository = new UserRepository();
+        userService = new UserService();
     }
 
     @Override
@@ -36,10 +38,10 @@ public class UserServlet extends HttpServlet {
             String password = req.getParameter("password");
             String userType = req.getParameter("userType");
 
-            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType));
-            userRepository.addUser(user);
+            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType)); // Using plain text password
+            userService.addUser(user);
 
-            List<User> users = userRepository.findAll();
+            List<User> users = userService.findAllUsers();
             req.setAttribute("users", users);
             req.getRequestDispatcher("TableUser.jsp").forward(req, resp);
         }
@@ -53,7 +55,7 @@ public class UserServlet extends HttpServlet {
             String userType = req.getParameter("userType");
 
             // Rechercher l'utilisateur existant
-            User existingUser = userRepository.findById(userId);
+            User existingUser = userService.findUserById(userId);
             if (existingUser != null) {
                 // Mettre à jour les champs
                 existingUser.setName(name);
@@ -62,7 +64,7 @@ public class UserServlet extends HttpServlet {
                 existingUser.setPassword(password);
                 existingUser.setUserType(User.UserType.valueOf(userType));
 
-                userRepository.updateUser(existingUser);
+                userService.updateUser(existingUser);
 
                 // Redirection après mise à jour
                 resp.sendRedirect(req.getContextPath() + "/users");
@@ -75,9 +77,7 @@ public class UserServlet extends HttpServlet {
         }
     }
 
-
-
-        @Override
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         String action = req.getParameter("action");
 
@@ -85,7 +85,7 @@ public class UserServlet extends HttpServlet {
             String userIdParam = req.getParameter("id");
             if (userIdParam != null && !userIdParam.isEmpty()) {
                 Long userId = Long.valueOf(userIdParam);
-                User user = userRepository.findById(userId);
+                User user = userService.findUserById(userId);
                 if (user != null) {
                     req.setAttribute("user", user);
                     req.getRequestDispatcher("/edit.jsp").forward(req, res);
@@ -100,17 +100,15 @@ public class UserServlet extends HttpServlet {
             String userIdParam = req.getParameter("id");
             if (userIdParam != null && !userIdParam.isEmpty()) {
                 Long userId = Long.valueOf(userIdParam);
-                userRepository.deleteUser(userId);
+                userService.deleteUser(userId);
                 res.sendRedirect(req.getContextPath() + "/users");
             } else {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID is required for deletion");
             }
         }
         else {
-            List<User> users = userRepository.findAll();
-
+            List<User> users = userService.findAllUsers();
             req.setAttribute("users", users);
-
             req.getRequestDispatcher("TableUser.jsp").forward(req, res);
         }
     }

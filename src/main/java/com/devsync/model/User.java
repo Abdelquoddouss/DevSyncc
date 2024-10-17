@@ -37,6 +37,7 @@
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Task> tasks;
 
+
         public enum UserType {
             USER, MANAGER
         }

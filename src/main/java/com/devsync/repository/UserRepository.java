@@ -1,11 +1,10 @@
     package com.devsync.repository;
 
     import com.devsync.model.User;
-    import jakarta.persistence.EntityManager;
-    import jakarta.persistence.EntityManagerFactory;
-    import jakarta.persistence.Persistence;
+    import jakarta.persistence.*;
 
     import java.util.List;
+    import java.util.Optional;
 
     public class UserRepository {
         private EntityManagerFactory emf;
@@ -15,16 +14,23 @@
         }
 
         public void addUser(User user) {
-                EntityManager em = emf.createEntityManager();
+            EntityManager em = emf.createEntityManager();
+            try {
                 em.getTransaction().begin();
                 em.persist(user);
                 em.getTransaction().commit();
+            } catch (Exception e) {
+                if (em.getTransaction().isActive()) {
+                    em.getTransaction().rollback();
+                }
+                e.printStackTrace();
+            } finally {
                 em.close();
-
+            }
         }
 
 
-        public List<User> findAll() {
+        public List<User> findAllUsers() {
             EntityManager em = emf.createEntityManager();
             List<User> users = em.createQuery("SELECT u FROM User u", User.class).getResultList();
             em.close();
@@ -64,7 +70,11 @@
                 return em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
                         .setParameter("email", email)
                         .getSingleResult();
+            } catch (NoResultException e) {
+                System.out.println("No user found with email: " + email);
+                return null;
             } catch (Exception e) {
+                e.printStackTrace(); // Log other exceptions
                 return null;
             } finally {
                 em.close();
@@ -73,4 +83,11 @@
 
 
 
+
+
     }
+
+
+
+
+
