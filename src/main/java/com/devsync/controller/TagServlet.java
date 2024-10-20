@@ -24,7 +24,7 @@ public class TagServlet extends HttpServlet {
     @Override
     public void init(){
         emf= Persistence.createEntityManagerFactory("DevSyncPU");
-        tagRepository = new TagRepository();
+        tagRepository = new TagRepository(emf);
     }
 
     @Override

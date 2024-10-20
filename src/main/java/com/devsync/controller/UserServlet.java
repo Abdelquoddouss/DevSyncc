@@ -2,6 +2,8 @@ package com.devsync.controller;
 
 import com.devsync.model.User;
 import com.devsync.repository.UserRepository;
+import com.devsync.service.UserService;
+import com.devsync.util.PasswordUtil;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.servlet.ServletException;
@@ -17,12 +19,11 @@ import java.util.List;
 public class UserServlet extends HttpServlet {
 
     private EntityManagerFactory emf;
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public void init() {
-        emf = Persistence.createEntityManagerFactory("DevSyncPU");
-        userRepository = new UserRepository();
+        userService = new UserService(emf);
     }
 
     @Override
@@ -36,10 +37,13 @@ public class UserServlet extends HttpServlet {
             String password = req.getParameter("password");
             String userType = req.getParameter("userType");
 
-            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType));
-            userRepository.addUser(user);
 
-            List<User> users = userRepository.findAll();
+            User user = new User(name, prenom, email, password, User.UserType.valueOf(userType));
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+            userService.addUser(user);
+
+            List<User> users = userService.findAll();
             req.setAttribute("users", users);
             req.getRequestDispatcher("TableUser.jsp").forward(req, resp);
         }
@@ -53,7 +57,7 @@ public class UserServlet extends HttpServlet {
             String userType = req.getParameter("userType");
 
             // Rechercher l'utilisateur existant
-            User existingUser = userRepository.findById(userId);
+            User existingUser = userService.findById(userId);
             if (existingUser != null) {
                 // Mettre à jour les champs
                 existingUser.setName(name);
@@ -62,7 +66,7 @@ public class UserServlet extends HttpServlet {
                 existingUser.setPassword(password);
                 existingUser.setUserType(User.UserType.valueOf(userType));
 
-                userRepository.updateUser(existingUser);
+                userService.updateUser(existingUser);
 
                 // Redirection après mise à jour
                 resp.sendRedirect(req.getContextPath() + "/users");
@@ -85,7 +89,7 @@ public class UserServlet extends HttpServlet {
             String userIdParam = req.getParameter("id");
             if (userIdParam != null && !userIdParam.isEmpty()) {
                 Long userId = Long.valueOf(userIdParam);
-                User user = userRepository.findById(userId);
+                User user = userService.findById(userId);
                 if (user != null) {
                     req.setAttribute("user", user);
                     req.getRequestDispatcher("/edit.jsp").forward(req, res);
@@ -100,14 +104,14 @@ public class UserServlet extends HttpServlet {
             String userIdParam = req.getParameter("id");
             if (userIdParam != null && !userIdParam.isEmpty()) {
                 Long userId = Long.valueOf(userIdParam);
-                userRepository.deleteUser(userId);
+                userService.deleteUser(userId);
                 res.sendRedirect(req.getContextPath() + "/users");
             } else {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "User ID is required for deletion");
             }
         }
         else {
-            List<User> users = userRepository.findAll();
+            List<User> users = userService.findAll();
 
             req.setAttribute("users", users);
 

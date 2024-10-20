@@ -11,7 +11,7 @@ import java.util.List;
 public class TaskRepository {
     private EntityManagerFactory emf;
 
-    public TaskRepository() {
+    public TaskRepository(EntityManagerFactory emf) {
         this.emf = Persistence.createEntityManagerFactory("DevSyncPU");
     }
 

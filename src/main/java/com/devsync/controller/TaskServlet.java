@@ -7,6 +7,10 @@ import com.devsync.model.User;
 import com.devsync.repository.TagRepository;
 import com.devsync.repository.TaskRepository;
 import com.devsync.repository.UserRepository;
+import com.devsync.service.TagService;
+import com.devsync.service.TaskService;
+import com.devsync.service.UserService;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,15 +26,16 @@ import java.util.stream.Collectors;
 @WebServlet("/tasks")
 public class TaskServlet extends HttpServlet {
 
-    private TaskRepository taskRepository;
-    private UserRepository userRepository;
-    private TagRepository tagRepository;
+    private EntityManagerFactory emf;
+    private TaskService taskService;
+    private UserService userService;
+    private TagService tagService;
 
     @Override
     public void init() {
-        taskRepository = new TaskRepository();
-        userRepository = new UserRepository();
-        tagRepository = new TagRepository();
+        taskService = new TaskService(emf);
+        userService = new UserService(emf);
+        tagService = new TagService(emf);
     }
 
     @Override
@@ -71,7 +76,7 @@ public class TaskServlet extends HttpServlet {
             // Assign the task to the user
             if (currentUser.getUserType() == User.UserType.MANAGER) {
                 Long userId = Long.valueOf(req.getParameter("userId"));
-                User assignedUser = userRepository.findById(userId);
+                User assignedUser = userService.findById(userId);
                 task.setUser(assignedUser);
             } else {
                 task.setUser(currentUser);
@@ -83,7 +88,7 @@ public class TaskServlet extends HttpServlet {
                 List<Tag> selectedTags = new ArrayList<>();
                 for (String tagIdStr : selectedTagIds) {
                     Long tagId = Long.valueOf(tagIdStr);
-                    Tag tag = tagRepository.findById(tagId);
+                    Tag tag = tagService.findById(tagId);
                     if (tag != null) {
                         selectedTags.add(tag);
                     }
@@ -92,15 +97,15 @@ public class TaskServlet extends HttpServlet {
             }
 
             // Add the task to the repository
-            taskRepository.addTask(task);
+            taskService.addTask(task);
 
             // Fetch and display all tasks
-            List<Task> tasks = taskRepository.findAll();
+            List<Task> tasks = taskService.findAll();
             req.setAttribute("tasks", tasks);
 
             if (currentUser.getUserType() == User.UserType.MANAGER) {
                 // Show the task list for managers
-                List<User> users = userRepository.findAll();
+                List<User> users = userService.findAll();
                 req.setAttribute("users", users);
                 req.getRequestDispatcher("Task.jsp").forward(req, resp);
             } else {
@@ -117,13 +122,13 @@ public class TaskServlet extends HttpServlet {
             try {
                 TaskStatus newStatus = TaskStatus.valueOf(newStatusStr);
 
-                taskRepository.updateTaskStatus(taskId, newStatus);
+                taskService.updateTaskStatus(taskId, newStatus);
 
-                List<Task> tasks = taskRepository.findAll();
+                List<Task> tasks = taskService.findAll();
                 req.setAttribute("tasks", tasks);
 
                 if (currentUser.getUserType() == User.UserType.MANAGER) {
-                    List<User> users = userRepository.findAll();
+                    List<User> users = userService.findAll();
                     req.setAttribute("users", users);
                     req.getRequestDispatcher("Task.jsp").forward(req, resp);
                 } else {
@@ -142,7 +147,7 @@ public class TaskServlet extends HttpServlet {
 
         if ("delete".equals(action)) {
             Long taskId = Long.valueOf(req.getParameter("taskId"));
-            Task task = taskRepository.findById(taskId); // Fetch the task to check ownership
+            Task task = taskService.findById(taskId); // Fetch the task to check ownership
 
             HttpSession session = req.getSession();
             User currentUser = (User) session.getAttribute("user");
@@ -153,9 +158,9 @@ public class TaskServlet extends HttpServlet {
             }
 
             if (currentUser.getUserType() == User.UserType.MANAGER) {
-                taskRepository.deleteTask(taskId);
+                taskService.deleteTask(taskId);
             } else if (task.getUser().getId().equals(currentUser.getId())) {
-                taskRepository.deleteTask(taskId);
+                taskService.deleteTask(taskId);
             } else {
                 // Set an error message if the user is not authorized to delete
                 req.setAttribute("error", "Vous n'êtes pas autorisé à supprimer cette tâche.");
@@ -177,10 +182,10 @@ public class TaskServlet extends HttpServlet {
             // Set currentUser as a request attribute
             req.setAttribute("currentUser", user);
 
-            List<Task> tasks = taskRepository.findAll();
-            List<Task> userTasks = taskRepository.findTasksByUser(user.getId());
-            List<User> users = userRepository.findAll();
-            List<Tag> tags = tagRepository.findAll();
+            List<Task> tasks = taskService.findAll();
+            List<Task> userTasks = taskService.findTasksByUser(user.getId());
+            List<User> users = userService.findAll();
+            List<Tag> tags = tagService.findAll();
 
             req.setAttribute("users", users);
             req.setAttribute("tags", tags);

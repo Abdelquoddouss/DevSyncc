@@ -11,7 +11,7 @@ public class TagRepository {
 
     private static EntityManagerFactory emf;
 
-    public TagRepository(){
+    public TagRepository(EntityManagerFactory emf){
         this.emf = Persistence.createEntityManagerFactory("DevSyncPU");
     }
 

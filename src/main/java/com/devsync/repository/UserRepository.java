@@ -10,7 +10,7 @@
     public class UserRepository {
         private EntityManagerFactory emf;
 
-        public UserRepository( ) {
+        public UserRepository(EntityManagerFactory emf) {
             this.emf = Persistence.createEntityManagerFactory("DevSyncPU");
         }
 
