@@ -1,5 +1,14 @@
-com\devsync\repository\UserRepository.class
-com\devsync\model\User$UserType.class
+com\devsync\controller\LoginServlet.class
+com\devsync\controller\TaskServlet.class
 com\devsync\controller\UserServlet.class
-com\devsync\enums\UserType.class
 com\devsync\model\User.class
+com\devsync\repository\UserRepository.class
+com\devsync\model\Tag.class
+com\devsync\repository\TagRepository.class
+com\devsync\controller\TagServlet.class
+com\devsync\controller\Dashbord.class
+com\devsync\model\User$UserType.class
+com\devsync\enums\UserType.class
+com\devsync\model\Task.class
+com\devsync\enums\TaskStatus.class
+com\devsync\repository\TaskRepository.class

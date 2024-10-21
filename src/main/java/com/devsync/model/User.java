@@ -1,55 +1,58 @@
-package com.devsync.model;
+    package com.devsync.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+    import jakarta.persistence.*;
+    import lombok.Data;
+    import lombok.Getter;
+    import lombok.Setter;
 
-@Data
-@Entity
-@Table(name = "users")
-public class User {
+    import java.util.List;
 
-    // Getters et Setters
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Data
+    @Entity
+    @Table(name = "users")
+    public class User {
 
-    @Column( name = "username" ,unique = true, nullable = false)
-    private String username;
+        // Getters et Setters
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
 
-    @Column(name = "prenom" , nullable = false)
-    private String prenom;
+        @Column(name = "name", nullable = false)
+        private String name;
 
-    @Column(name = "email" ,unique = true, nullable = false)
-    private String email;
+        @Column(name = "prenom" , nullable = false)
+        private String prenom;
 
-    @Column(name = "password" , nullable = false)
-    private String password;
+        @Column(name = "email" ,unique = true, nullable = false)
+        private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "usertype" , nullable = false)
-    private UserType userType;
+        @Column(name = "password" , nullable = false)
+        private String password;
 
-    public enum UserType {
-        USER, MANAGER
+        @Enumerated(EnumType.STRING)
+        @Column(name = "usertype" , nullable = false)
+        private UserType userType;
+
+        @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+        private List<Task> tasks;
+
+        public enum UserType {
+            USER, MANAGER
+        }
+
+        public User() {}
+
+        public User( String name, String prenom, String email, String password, UserType userType) {
+
+            this.name = name;
+            this.prenom = prenom;
+            this.email = email;
+            this.password = password;
+            this.userType = userType;
+        }
+
+
     }
-
-    public User() {}
-
-    public User(String username, String name, String prenom, String email, String password, UserType userType) {
-        this.username = username;
-        this.name = name;
-        this.prenom = prenom;
-        this.email = email;
-        this.password = password;
-        this.userType = userType;
-    }
-
-
-}
 
 
