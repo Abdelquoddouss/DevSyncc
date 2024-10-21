@@ -1,5 +1,6 @@
     package com.devsync.model;
 
+    import com.devsync.enums.UserType;
     import jakarta.persistence.*;
     import lombok.Data;
     import lombok.Getter;
@@ -36,6 +37,9 @@
 
         @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
         private List<Task> tasks;
+
+        public User(long l, String user, String two, String mail, String password, String user2, com.devsync.enums.UserType userType, int i, int i1) {
+        }
 
         public enum UserType {
             USER, MANAGER

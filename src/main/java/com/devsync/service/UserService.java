@@ -8,17 +8,27 @@ import java.util.List;
 
 public class UserService {
 
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     public UserService(EntityManagerFactory emf) {
         this.userRepository = new UserRepository(emf);
     }
 
     public void addUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("User email is required");
+        }
         userRepository.addUser(user);
     }
 
     public void updateUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("User email is required");
+        }
+        User existingUser = userRepository.findById(user.getId());
+        if (existingUser == null) {
+            throw new IllegalArgumentException("User not found");
+        }
         userRepository.updateUser(user);
     }
 
