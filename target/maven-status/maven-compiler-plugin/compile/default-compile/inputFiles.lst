@@ -1,4 +1,13 @@
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\controller\Dashbord.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\controller\LoginServlet.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\controller\TagServlet.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\controller\TaskServlet.java
 C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\controller\UserServlet.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\enums\TaskStatus.java
 C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\enums\UserType.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\model\Tag.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\model\Task.java
 C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\model\User.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\repository\TagRepository.java
+C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\repository\TaskRepository.java
 C:\Users\Youcode\Desktop\devsyncc\src\main\java\com\devsync\repository\UserRepository.java
