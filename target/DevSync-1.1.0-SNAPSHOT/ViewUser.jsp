@@ -212,7 +212,7 @@
                                     <select name="status" onchange="this.form.submit()" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
                                         <option value="NOT_STARTED" <%= task.getStatus().equals("NOT_STARTED") ? "selected" : "" %>>Not Started</option>
                                         <option value="IN_PROGRESS" <%= task.getStatus().equals("IN_PROGRESS") ? "selected" : "" %>>In Progress</option>
-                                        <option value="COMPLETED" <%= task.getStatus().equals("COMPLETED") ? "selected" : "" %>>Completed</option>
+                                        <option value="DONE" <%= task.getStatus().equals("DONE") ? "selected" : "" %>>DONE</option>
                                     </select>
 
                                 </form>
